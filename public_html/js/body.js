@@ -1,10 +1,8 @@
 var mctx;
+var aRatio = 1;
 
-var csize = 0;
-var scale = 0;
-var origin = [];
-
-var brad = 0.1;
+var grv = [0, 9.8];
+var brad = 0.08;
 var cycle = 100;
 var pat = [];
 var balls = [];
@@ -15,11 +13,12 @@ function init() {
   if(!mainc.getContext) {
     return;
   }
-  csize = [mainc.width, mainc.height];
-  scale = csize[0] / 2.0;
-  origin = vScale(0.5, csize);
+  var scale = mainc.width / 2.0;
+  aRatio = mainc.height / mainc.width;
   mctx = mainc.getContext('2d');
   
+  mctx.translate(mainc.width / 2, mainc.height / 2);
+  mctx.scale(scale, scale);
   setPattern();
   setInterval(draw, 20);
 }
@@ -28,23 +27,36 @@ function setPattern() {
   pat = [
     new Pattern(3, [0.5, 0.0], [0.6, 0.0])
   ];
+  balls = [
+    new Ball(vv, '#ff8080', 0, 150),
+    new Ball(vv, '#80ff80', 50, 150),
+    new Ball(vv, '#8080ff', 100, 150)
+  ];
 }
 
-var step = 0;
-var vv = [[-0.5, 0.0], [0.0, -1.0], [0.5, 0.0]];
+var vv = [[-0.5, 0.5], [0.0, -1.0], [0.5, 0.5]];
 
 function draw() {
   mctx.fillStyle = '#ffffff';
-  mctx.fillRect(0, 0, csize[0], csize[1]);
-  mctx.fillStyle = '#808080';
-  drawCircle(bezier(vv, step / cycle), 0.1);
-  step = (step + 1) % cycle;
+  mctx.fillRect(-1, -aRatio, 2, 2*aRatio);
+  for(var i=0; i<balls.length; i++) {
+    mctx.fillStyle = balls[i].style;
+    drawCircle(bezier(vv, balls[i].step / balls[i].cycle), brad);
+    balls[i].step = (balls[i].step + 1) % balls[i].cycle;
+  }
 }
 
 function Pattern(n, start, end) {
   this.n = n;
   this.start = start;
   this.end = end;
+}
+
+function Ball(ps, style, step, cycle) {
+  this.ps = ps;
+  this.style = style;
+  this.step = step;
+  this.cycle = cycle;
 }
 
 function state(idx, step) {
@@ -68,9 +80,8 @@ function bezier(ps, t) {
 }
 
 function drawCircle(v, r) {
-  var wv = project(v);
   mctx.beginPath();
-  mctx.arc(wv[0], wv[1], r*scale, 0, Math.PI*2.0, true);
+  mctx.arc(v[0], v[1], r, 0, Math.PI*2.0);
   mctx.fill();
 }
 
@@ -104,12 +115,4 @@ function vScale(s, v) {
     u[i] = s * v[i];
   }
   return u;
-}
-
-function project(v) {
-  return vAdd(vScale(scale, v), origin);
-}
-
-function unproject(v) {
-  return vScale(1/scale, vSub(v, origin));
 }
