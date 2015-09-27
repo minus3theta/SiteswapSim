@@ -8,6 +8,14 @@
     <script type="text/javascript" src="js/body.js"></script>
   </head>
   <body onload="init()">
-    <canvas id="mainc" width="480" height="640"></canvas>
+    <canvas id="mainc" width="400" height="800"></canvas>
+    <table>
+      <tr>
+        <td>scale:</td>
+        <td>
+          <input type="number" id="input_scale" onchange='readScale();' step="0.1" min="1.0" value="1.0">
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
