@@ -7,12 +7,13 @@ var mspf = 20;
 
 var grv = [0, 9.8];
 var brad = 0.08;
-var cycle = 100;
+var cycle = 15;
 var pat = [];
 var balls = [];
 var idx = 0;
 var even = true;
-var step = 0;
+var step = cycle;
+var nextBall = null;
 
 function init() {
   var mainc = document.getElementById('mainc');
@@ -27,10 +28,30 @@ function init() {
 }
 
 function setPattern() {
+  holdRatio = Number(document.getElementById("input_hold").value);
   pat = [
-    new Pattern(3, [0.5, 0.0], [0.6, 0.0])
+    new Pattern(7, [0.4, 0.0], [-0.7, -0.1]),
+    new Pattern(5, [0.4, 0.0], [-0.7, -0.1]),
+    new Pattern(3, [0.4, 0.0], [-0.7, -0.1]),
+    new Pattern(1, [0.4, 0.0], [-0.7, -0.1])
   ];
+  for(var i=0; i<pat.length; i++) {
+    var nxtP = pat[(i + pat[i].n) % pat.length];
+    var v1 = vSub(pat[i].ps1[2], pat[i].ps1[1]);
+    var v2 = vSub(nxtP.ps1[1], nxtP.ps1[0]);
+    if(pat[i].n % 2 === 1) {
+      v2 = vFlipX(v2);
+    }
+    var p1 = pat[i].to;
+    var p4 = pat[i].n % 2 === 0 ? nxtP.from : vFlipX(nxtP.from);
+    var p2 = vAdd(p1, vScale(holdRatio / 7, v1));
+    var p3 = vSub(p4, vScale(holdRatio / 7, v2));
+    pat[i].ps2 = [p1, p2, p3, p4];
+  }
   balls = [];
+  idx = 0;
+  step = 0;
+  even = true;
 }
 
 var vv = [[-0.5, 0.0], [0.5, 0.0]];
@@ -42,35 +63,60 @@ function draw() {
   mctx.scale(cscale, cscale);
   mctx.translate(scale, 4 * scale - 0.5);
   for(var i=0; i<balls.length; i++) {
-    mctx.fillStyle = balls[i].style;
-    drawCircle(bezier(balls[i].ps, balls[i].step / balls[i].cycle), brad);
-    balls[i].step = (balls[i].step + 1) % balls[i].cycle;
+    var b = balls[i];
+    mctx.fillStyle = b.style;
+    var p = pat[b.idx];
+    var t = (p.n - holdRatio) * cycle;
+    var x = b.step < t ? bezier(p.ps1, b.step / t) :
+            bezier(p.ps2, (b.step - t) / (holdRatio * cycle));
+    if(b.even) {
+      drawCircle(x, brad);
+    } else {
+      drawCircle(vFlipX(x), brad);
+    }
+    b.step++;
+    if(b.step >= p.n * cycle) {
+      nextBall = b;
+    }
+  }
+  step++;
+  if(step >= cycle) {
+    if(nextBall === null) {
+      balls[balls.length] = new Ball('#8080ff', idx);
+      nextBall = null;
+    } else {
+      nextBall.idx = idx;
+      nextBall.even = even;
+      nextBall.step = 0;
+      nextBall = null;
+    }
+    step = 0;
+    idx = (idx + 1) % pat.length;
+    even = !even;
   }
 }
 
-function Pattern(n, start, end) {
+function Pattern(n, from, to) {
   this.n = n;
-  this.start = start;
-  this.end = end;
+  var t = (n - holdRatio) * cycle * mspf / 1000;
+  this.from = from;
+  this.to = to;
+  this.ps1 = [from,
+    vSub(vScale(0.5, vAdd(from, to)), vScale(t * t / 4, grv)),
+    to];
+  this.ps2 = [];
 }
 
-function Ball(vs, style, step, cycle) {
-  var t = cycle * mspf / 1000;
-  this.ps = [vs[0],
-    vSub(vScale(0.5, vAdd(vs[0], vs[1])), vScale(t * t / 4, grv)),
-    vs[1]];
+function Ball(style, idx) {
   this.style = style;
-  this.step = step;
-  this.cycle = cycle;
+  this.idx = idx;
+  this.even = even;
+  this.step = 0;
 }
 
 function readScale()  {
   scale = Number(document.getElementById("input_scale").value);
   cscale = csize[0] / scale / 2;
-}
-
-function readHold()  {
-  holdRatio = Number(document.getElementById("input_hold").value);
 }
 
 function bezier(ps, t) {
