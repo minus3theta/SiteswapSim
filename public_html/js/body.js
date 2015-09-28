@@ -30,8 +30,6 @@ function init() {
 }
 
 function setPattern() {
-  holdRatio = Number(document.getElementById("input_hold").value);
-  step = cycle = Number(document.getElementById("input_cycle").value);
   var pattern = document.getElementById("input_pattern").value;
   if(!pattern.match(/^[0-9a-z]+$/)) {
     alert("input numbers or small alphabets");
@@ -59,6 +57,8 @@ function setPattern() {
       return;
     }
   }
+  holdRatio = Number(document.getElementById("input_hold").value);
+  step = cycle = Number(document.getElementById("input_cycle").value);
   pat = [];
   for(var i=0; i<pnum.length; i++) {
     pat[i] = new Pattern(pnum[i], defFrom, pnum[i] % 2 === 0 ? defTo : vFlipX(defTo));
@@ -117,14 +117,15 @@ function draw() {
   }
   step++;
   if(step >= cycle) {
-    if(nextBall === null) {
-      balls[balls.length] = new Ball('#8080ff', idx);
-      nextBall = null;
-    } else {
-      nextBall.idx = idx;
-      nextBall.even = even;
-      nextBall.step = 0;
-      nextBall = null;
+    if(pat[idx].n !== 0) {
+      if(nextBall === null) {
+        balls[balls.length] = new Ball('#8080ff', idx);
+      } else {
+        nextBall.idx = idx;
+        nextBall.even = even;
+        nextBall.step = 0;
+        nextBall = null;
+      }
     }
     step = 0;
     idx = (idx + 1) % pat.length;
