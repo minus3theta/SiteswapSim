@@ -72,7 +72,17 @@ function draw() {
   mctx.fillStyle = '#ffffff';
   mctx.fillRect(0, 0, csize[0], csize[1]);
   mctx.scale(cscale, cscale);
-  mctx.translate(scale, 4 * scale - 0.5);
+  mctx.translate(scale, 4 * scale - 1.0);
+  mctx.strokeStyle = '#404040';
+  mctx.lineWidth = 0.01;
+  for(var y=0; y > -4 * scale; y--) {
+    mctx.strokeStyle = y % 5 === 0 ? '#ff4040' : '#404040';
+    mctx.beginPath();
+    mctx.moveTo(-scale, y);
+    mctx.lineTo(scale, y);
+    mctx.closePath();
+    mctx.stroke();
+  }
   for(var i=0; i<balls.length; i++) {
     var b = balls[i];
     mctx.fillStyle = b.style;
