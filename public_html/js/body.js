@@ -2,6 +2,7 @@ var mctx;
 var csize = [];
 var scale = 1;
 var cscale = 0;
+var holdRatio = 0.5;
 var mspf = 20;
 
 var grv = [0, 9.8];
@@ -9,7 +10,9 @@ var brad = 0.08;
 var cycle = 100;
 var pat = [];
 var balls = [];
-var ptr = [0, 1];
+var idx = 0;
+var even = true;
+var step = 0;
 
 function init() {
   var mainc = document.getElementById('mainc');
@@ -27,11 +30,7 @@ function setPattern() {
   pat = [
     new Pattern(3, [0.5, 0.0], [0.6, 0.0])
   ];
-  balls = [
-    new Ball(vv, '#ff8080', 0, 60),
-    new Ball(vv, '#80ff80', 20, 60),
-    new Ball(vv, '#8080ff', 40, 60)
-  ];
+  balls = [];
 }
 
 var vv = [[-0.5, 0.0], [0.5, 0.0]];
@@ -65,14 +64,13 @@ function Ball(vs, style, step, cycle) {
   this.cycle = cycle;
 }
 
-function state(idx, step) {
-  this.idx = idx;
-  this.step = step;
-}
-
 function readScale()  {
   scale = Number(document.getElementById("input_scale").value);
   cscale = csize[0] / scale / 2;
+}
+
+function readHold()  {
+  holdRatio = Number(document.getElementById("input_hold").value);
 }
 
 function bezier(ps, t) {
@@ -97,10 +95,6 @@ function drawCircle(v, r) {
 }
 
 function vFlipX(v) {
-//  var u = new Array(v.length);
-//  for(var i=0; i<v.length; i++) {
-//    u[i] = -v[i];
-//  }
   return [-v[0], v[1]];
 }
 
