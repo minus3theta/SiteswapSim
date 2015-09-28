@@ -7,12 +7,14 @@ var mspf = 20;
 
 var grv = [0, 9.8];
 var brad = 0.08;
-var cycle = 15;
+var defFrom = [0.4, 0.0];
+var defTo = [0.7, 0.1];
+var cycle = 1;
 var pat = [];
 var balls = [];
 var idx = 0;
 var even = true;
-var step = cycle;
+var step = 1;
 var nextBall = null;
 
 function init() {
@@ -29,12 +31,23 @@ function init() {
 
 function setPattern() {
   holdRatio = Number(document.getElementById("input_hold").value);
-  pat = [
-    new Pattern(7, [0.4, 0.0], [-0.7, -0.1]),
-    new Pattern(5, [0.4, 0.0], [-0.7, -0.1]),
-    new Pattern(3, [0.4, 0.0], [-0.7, -0.1]),
-    new Pattern(1, [0.4, 0.0], [-0.7, -0.1])
-  ];
+  step = cycle = Number(document.getElementById("input_cycle").value);
+  var pattern = document.getElementById("input_pattern").value;
+  if(!pattern.match(/^[0-9a-z]+$/)) {
+    alert("input numbers or small alphabets");
+    return;
+  }
+  pat = [];
+  for(var i=0; i<pattern.length; i++) {
+    var c = pattern.charCodeAt(i);
+    var n;
+    if(0x30 <= c && c <= 0x39) {
+      n = c - 0x30;
+    } else {
+      n = c - 0x61 + 10;
+    }
+    pat[i] = new Pattern(n, defFrom, n % 2 === 0 ? defTo : vFlipX(defTo));
+  }
   for(var i=0; i<pat.length; i++) {
     var nxtP = pat[(i + pat[i].n) % pat.length];
     var v1 = vSub(pat[i].ps1[2], pat[i].ps1[1]);
@@ -53,8 +66,6 @@ function setPattern() {
   step = 0;
   even = true;
 }
-
-var vv = [[-0.5, 0.0], [0.5, 0.0]];
 
 function draw() {
   mctx.setTransform(1, 0, 0, 1, 0, 0);
