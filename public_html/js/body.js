@@ -37,7 +37,11 @@ function setPattern() {
     alert("input numbers or small alphabets");
     return;
   }
-  pat = [];
+  var arrive = new Array(pattern.length);
+  var pnum = new Array(pattern.length);
+  for(var i=0; i<arrive.length; i++) {
+    arrive[i] = false;
+  }
   for(var i=0; i<pattern.length; i++) {
     var c = pattern.charCodeAt(i);
     var n;
@@ -46,7 +50,18 @@ function setPattern() {
     } else {
       n = c - 0x61 + 10;
     }
-    pat[i] = new Pattern(n, defFrom, n % 2 === 0 ? defTo : vFlipX(defTo));
+    pnum[i] = n;
+    arrive[(i + n) % pattern.length] = true;
+  }
+  for(var i=0; i<arrive.length; i++) {
+    if(!arrive[i]) {
+      alert("this pattern is not jugglable");
+      return;
+    }
+  }
+  pat = [];
+  for(var i=0; i<pnum.length; i++) {
+    pat[i] = new Pattern(pnum[i], defFrom, pnum[i] % 2 === 0 ? defTo : vFlipX(defTo));
   }
   for(var i=0; i<pat.length; i++) {
     var nxtP = pat[(i + pat[i].n) % pat.length];
