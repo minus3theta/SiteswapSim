@@ -2,3 +2,15 @@ canvas {
   background-color: #ffffff;
   border: 1px solid #000000;
 }
+
+#mainc {
+  float: left;
+}
+
+#control {
+  float: none;
+}
+
+.clear {
+  clear: both;
+}
